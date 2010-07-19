@@ -81,6 +81,7 @@ class Response():
 	__curr_page_num = 0
 	__pages_total = 0
 	__results_total = 0
+	results = []
 	
 	def __init__(self, request):
 		self.__request = request
@@ -88,9 +89,9 @@ class Response():
 		
 
 	def __set_self(self):
-		response = self.__request.send().read()
+		self.__raw_response = self.__request.send().read()
 		
-		self.__curr_page = et.fromstring(response)
+		self.__curr_page = et.fromstring(self.__raw_response)
 		self.__pages.append(self.__curr_page)
 		
 		page_attribs = self.__curr_page.find('BookList').attrib
