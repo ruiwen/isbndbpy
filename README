@@ -16,3 +16,35 @@ ISBNdbpy - Copyright 2010 Ruiwen Chua <ruiwen+isbndbpy@thoughtmonkeys.com>
 
 
 Set your ISBNdb API key in constants.py, or otherwise pass it in as a keyword argument ('apikey') when constructing a Request object.
+
+
+Getting Started
+
+The Request object is the base level for using this wrapper.
+
+Arguments to the Request constructor include: collection, index and value.
+
+These arguments correspond to the data collection, index1 and value1 as defined at: http://isbndb.com/docs/api/50-collections.html
+
+Eg. the 'collection' argument to the constructor can be one of 'books', 'subjects', 'categories', 'authors', 'publishers'
+
+
+
+EXAMPLE:
+
+>>> import isbndbpy
+
+>>> req = isbndbpy.Request('books', 'combined', 'makers by cory doctorow')
+
+>>> req.send()
+<addinfourl at 142601676 whose fp = <socket._fileobject object at 0x87d396c>>
+
+>>> req.send().read()
+'<?xml version="1.0" encoding="UTF-8"?>\n\n<ISBNdb server_time="2010-07-19T11:18:47Z">\n<BookList total_results="1" page_size="10" page_number="1" shown_results="1">\n<BookData book_id="makers_a01" isbn="0765312794" isbn13="9780765312792">\n<Title>Makers</Title>\n<TitleLong></TitleLong>\n<AuthorsText>Cory Doctorow, </AuthorsText>\n<PublisherText publisher_id="tor_books">Tor Books</PublisherText>\n</BookData>\n</BookList>\n</ISBNdb>\n'
+
+>>> req.response()
+<isbndbpy.Response instance at 0x87f3dcc>
+
+>>> req.response().raw()
+'<?xml version="1.0" encoding="UTF-8"?>\n\n<ISBNdb server_time="2010-07-19T11:19:20Z">\n<BookList total_results="1" page_size="10" page_number="1" shown_results="1">\n<BookData book_id="makers_a01" isbn="0765312794" isbn13="9780765312792">\n<Title>Makers</Title>\n<TitleLong></TitleLong>\n<AuthorsText>Cory Doctorow, </AuthorsText>\n<PublisherText publisher_id="tor_books">Tor Books</PublisherText>\n</BookData>\n</BookList>\n</ISBNdb>\n'
+
