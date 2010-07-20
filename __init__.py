@@ -141,5 +141,90 @@ class Response():
 			return None
 
 
+
+class Search(object):
+	"""Encapsulates a search query on ISBNdb.com, containing both a Request and Response"""
+
+	_res_class = NotImplemented
+
+	def __init__(self, collection, index, value, **kwargs):
+
+		self.__request = None
+		self.__response = None
+
+		self.__results = []
+		self.__results_iterator = None
+		
+		self.__request = Request(collection, index, value,  **kwargs)
+		self.__response = self.__request.response()
+				
+		self.__process_responses()
+		
+		
+	
+	def __process_responses(self):
+		"""Process incoming responses """
+		t = self.__response.current_page()
+		if t.tag == "ISBNdb":
+			t = list(t)[0] # Extract the first child of the element returned by .current_page(), usually an <ISBNdb>
+		
+		for i in t.iterchildren():
+			self.__results.append(self._res_class(i))
+
+
+
+	# Implementing the Iterator protocol
+	def __iter__(self):
+		for idx, val in enumerate(self.__results):
+			yield val
+			
+			if idx == len(self.__results)-1:
+				if self.__response.has_more():
+					self.__response.next_page()
+					self.__process_responses()
+				else:
+					raise StopIteration
+				
+				
+	
+class Book():
+	"""Book class"""
+
+	def __init__(self, elem):
+		'''Converts a <BookData> Element into a Book object'''
+		
+		self.isbn10 = elem.get('isbn')
+		self.isbn13 = elem.get('isbn13')
+		self.title = elem.find("Title").text
+		
+		self.authors = elem.find("AuthorsText").text.split(", ")
+		if self.authors[-1] == '':
+			self.authors.pop()
+			
+		self.publisher = elem.find("PublisherText").text
+		
+	def __str__(self):
+		return self.__unicode__()
+
+	def __unicode__(self):
+		return "%s by %s, %s" % (self.title, (", ").join(self.authors), self.publisher)
+
+
+
+class BookSearch(Search):
+	"""Searches the Books Data Collection on ISBNdb.com"""
+	
+	_res_class = Book
+	
+	def __init__(self, index, value, **kwargs):
+		#self._res_class = Book
+		super(BookSearch, self).__init__('books', index, value, **kwargs)		
+
+
+	#def _res_class(self):
+	#	return Book
+
+	
+
 class ISBNdbAPIException(Exception):
 	pass
