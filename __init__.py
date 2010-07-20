@@ -91,13 +91,16 @@ class Response():
 		
 
 	def __set_self(self):
+		# Send the request and read the reponse
 		self.__raw_response = self.__request.send().read()
 		
 		self.__curr_page = et.fromstring(self.__raw_response)
 		self.__pages.append(self.__curr_page)
 		
-		page_attribs = self.__curr_page.find('BookList').attrib
-		self.__curr_page_num = page_attribs['page_number']
+		# list() gives us a list of descendents of root element, ie. in this case <ISBNdb>
+		# So we take the first child and extract some info from it
+		page_attribs = list(self.__curr_page)[0].attrib
+		self.__curr_page_num = int(page_attribs['page_number'])
 
 		
 		# The following bits should only be run the first time this Response
@@ -116,17 +119,26 @@ class Response():
 	
 	def raw(self):
 		return self.__raw_response
-	
-	# Implementing the iterator protocol
+
+	def has_more(self):
+		return True if self.__curr_page_num < self.__pages_total else False
+
+
+	def current_page(self):
+		if self.__curr_page is not None:
+			self.__curr_page = et.fromstring(self.__raw_response)
+
+		return self.__curr_page
 		
-	def __iter__(self):
-		return self
 	
-	def next():
+	def next_page(self):
 		if self.__curr_page_num < self.__pages_total:
 			self.__request.extend_url({'page_number': self.__curr_page_num + 1}) # Set our request to point to the next page
+			self.__set_self()
+			return self.current_page()			
+			
 		else:
-			raise StopIteration()
+			return None
 
 
 class ISBNdbAPIException(Exception):
