@@ -7,11 +7,10 @@ from constants import *
 
 class Request():
 	
-	url = '';
-	
 	def __init__(self, collection, index, value, **kwargs):
 		
 		# Construct the API address
+		self.url = ''
 		
 		# Are arguments valid?
 		if self.__validate(collection, index, value, kwargs):
@@ -75,15 +74,18 @@ class Request():
 class Response():
 	'''Response from the ISBNdb.com server'''
 	
-	__request = None
-	__pages = []
-	__curr_page = None
-	__curr_page_num = 0
-	__pages_total = 0
-	__results_total = 0
-	results = []
-	
 	def __init__(self, request):
+	
+		self.__request = None
+		self.__pages = []
+		self.__curr_page = None
+		self.__curr_page_num = 0
+		self.__pages_total = 0
+		self.__results_total = 0
+		self.__raw_response = ""
+
+		self.results = []	
+	
 		self.__request = request
 		self.__set_self()	
 		
